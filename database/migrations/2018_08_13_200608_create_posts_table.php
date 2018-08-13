@@ -15,6 +15,27 @@ class CreatePostsTable extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->increments('id');
+
+            $table->integer('user_id')->unsigned();
+            $table->integer('category_id')->unsigned();
+
+            $table->string('title', 128); // Laravel 5.5
+            $table->string('slug', 128)->unique(); // Laravel-5-5
+            $table->mediumText('excerpt')->nullable(); // Extracto
+            $table->text('body'); // Contenido
+            $table->enum('status', ['DRAFT', 'PUBLISHED'])->default('DRAFT');
+            $table->string('file', 128)->nullable();
+
+            // Relation
+
+            $table->foreign('user_id')->references('id')->on('users')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+    
+            $table->foreign('category_id')->references('id')->on('categories')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+
             $table->timestamps();
         });
     }
