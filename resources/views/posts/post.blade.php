@@ -8,7 +8,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <span>Categoría</span>
-                    <a href="#">{{ $post->category->name }}</a>
+                    <a href="{{ route('category', $post->category->slug) }}">{{ $post->category->name }}</a>
                 </div>
 
                 <div class="panel-body">
@@ -18,7 +18,7 @@
                     {{ $post->body }}
                     <hr>
                     @foreach($post->tags as $tag)
-                        <a href="#" class="label label-primary">{{ $tag->name }}</a>
+                        <a href="{{ route('tag', $tag->slug) }}" class="label label-primary">{{ $tag->name }}</a>
                     @endforeach
                 </div>
             </div>
