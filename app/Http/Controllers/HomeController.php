@@ -28,4 +28,9 @@ class HomeController extends Controller
         $posts = Post::orderBy('id', 'DESC')->where('status', 'PUBLISHED')->paginate(5);
         return view('home', compact('posts'));
     }
+
+    public function post($slug){
+        $post = Post::where('slug', $slug)->first();
+        return view('posts.post', compact('post'));
+    }
 }
