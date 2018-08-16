@@ -22,3 +22,10 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/post/{slug}', 'HomeController@post')->name('post');
 Route::get('/category/{slug}', 'HomeController@category')->name('category');
 Route::get('/tag/{slug}', 'HomeController@tag')->name('tag');
+
+// Admin
+
+Route::resource('posts', 'Admin\PostController');
+Route::resource('categories', 'Admin\CategoryController');
+Route::resource('tags', 'Admin\TagController');
+
