@@ -5,7 +5,7 @@ use Faker\Generator as Faker;
 $factory->define(App\Post::class, function (Faker $faker) {
     $title = $faker->sentence(10); // Faker crea un título de 4 palabras
     return [
-        'user_id' => rand(1, 20),
+        'user_id' => rand(1, 21),
         'category_id' => rand(1, 20),
         'title' => $title,
         'slug' => str_slug($title),

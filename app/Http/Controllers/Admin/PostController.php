@@ -5,8 +5,24 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
+// Requests
+use App\Http\Requests\PostStoreRequest;
+use App\Http\Requests\PostUpdateRequest;
+
+use App\Post; 
+use App\Category; 
+use App\Tag; 
+
+use Illuminate\Support\Facades\Storage;
+
+use Auth;
+
 class PostController extends Controller
 {
+    public function __construct(){
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +30,8 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
+        $posts = Post::orderBy('id', 'DESC')->where('user_id', Auth::user()->id)->paginate(5);
+        return view('admin.posts.index', compact('posts'));
     }
 
     /**
@@ -24,7 +41,9 @@ class PostController extends Controller
      */
     public function create()
     {
-        //
+        $categories = Category::orderBy('name', 'ASC')->pluck('name', 'id');
+        $tags = Tag::orderBy('name', 'ASC')->get();
+        return view('admin.posts.create', compact('categories', 'tags'));
     }
 
     /**
@@ -33,9 +52,21 @@ class PostController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(PostStoreRequest $request)
     {
-        //
+        $post = Post::create($request->all());
+
+        // Image
+        if($request->file('file')){
+            $path = Storage::disk('public')->put('images', $request->file('file'));
+            $post->fill(['file' => asset($path)])->save();
+        }
+
+        // Tags
+
+        $post->tags()->sync($request->get('tags'));
+
+        return redirect()->route('posts.edit', $post->id)->with('info', 'Post creado con éxito');
     }
 
     /**
@@ -46,7 +77,9 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        //
+        $post = Post::find($id);
+        $this->authorize('pass', $post);
+        return view('admin.posts.show', compact('post'));
     }
 
     /**
@@ -57,7 +90,13 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        //
+        $post = Post::find($id);
+        $this->authorize('pass', $post);
+
+
+        $categories = Category::orderBy('name', 'ASC')->pluck('name', 'id');
+        $tags = Tag::orderBy('name', 'ASC')->get();
+        return view('admin.posts.edit', compact('post', 'categories', 'tags'));
     }
 
     /**
@@ -67,9 +106,23 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(PostUpdateRequest $request, $id)
     {
-        //
+        $post = Post::find($id);
+        $this->authorize('pass', $post);
+        $post->fill($request->all())->save();
+
+        // Image
+        if($request->file('file')){
+            $path = Storage::disk('public')->put('images', $request->file('file'));
+            $post->fill(['file' => asset($path)])->save();
+        }
+
+        // Tags
+
+        $post->tags()->sync($request->get('tags'));
+
+        return redirect()->route('posts.edit', $post->id)->with('info', 'Post actualizado con éxito');
     }
 
     /**
@@ -80,6 +133,9 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $post = Post::find($id);
+        $this->authorize('pass', $post);
+        $post->delete();
+        return back()->with('info', 'Eliminado correctamente');
     }
 }
